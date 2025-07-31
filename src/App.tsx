@@ -22,7 +22,7 @@ const App = () => {
     const loadLevels = async () => {
       try {
         // Load all level files
-        const levelFiles = ['level1.txt', 'level2.txt', 'level3.txt'];
+        const levelFiles = ['level1.txt', 'level2.txt', 'level3.txt', 'level4.txt'];
         const loadedLevels: Level[] = [];
         
         for (let i = 0; i < levelFiles.length; i++) {
@@ -189,7 +189,7 @@ const App = () => {
   return (
     <Container maxWidth="xl" className="App" onKeyDown={handleKeyDown} tabIndex={0}>
       <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
-        Color Switch Game
+        Roots God Cathedral Boss
       </Typography>
       
       <div className="game-container">
