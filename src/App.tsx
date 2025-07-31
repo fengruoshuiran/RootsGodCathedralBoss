@@ -3,7 +3,7 @@ import { Box, Button, Container, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import './App.css';
 
-type CellType = 'start' | 'end' | 'red' | 'blue' | 'black' | 'switch' | 'path';
+type CellType = 'start' | 'end' | 'red' | 'blue' | 'black' | 'switch' | 'path' | 'portal1' | 'portal2';
 
 interface Level {
   id: number;
@@ -63,6 +63,8 @@ const App = () => {
           case 'R': return 'red';
           case 'B': return 'blue';
           case 'T': return 'switch';
+          case '@': return 'portal1';
+          case 'O': return 'portal2';
           case '.': return 'path';
           default: return 'path'; // Default to path for unknown chars
         }
@@ -91,6 +93,25 @@ const App = () => {
     if (targetCell === 'black') return;
     if (targetCell === 'red' && playerColor !== 'red') return;
     if (targetCell === 'blue' && playerColor !== 'blue') return;
+
+    // Handle portal teleport
+    if (targetCell === 'portal1' || targetCell === 'portal2') {
+      // Find all portals of same type
+      const portals = [];
+      for (let i = 0; i < currentGrid.length; i++) {
+        for (let j = 0; j < currentGrid[i].length; j++) {
+          if (currentGrid[i][j] === targetCell && (i !== row || j !== col)) {
+            portals.push([i, j]);
+          }
+        }
+      }
+      // If found another portal, teleport to random one
+      if (portals.length > 0) {
+        const [newRow, newCol] = portals[Math.floor(Math.random() * portals.length)];
+        setPlayerPosition([newRow, newCol]);
+        return;
+      }
+    }
 
     // Handle switch cell
     if (targetCell === 'switch') {
@@ -150,6 +171,8 @@ const App = () => {
       case 'black': return '#424242';
       case 'switch': return 'rgba(189, 46, 221, 0.5)'; // 降低明度的紫色
       case 'path': return 'rgba(80, 180, 20, 0.3)'; // 降低明度的绿色路径
+      case 'portal1': return 'rgba(255, 165, 0, 0.5)'; // 橙色半透明传送门
+      case 'portal2': return 'rgba(0, 255, 255, 0.5)'; // 青色半透明传送门
       default: return 'rgba(100, 221, 23, 0.3)';
     }
   };
