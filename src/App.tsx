@@ -26,7 +26,7 @@ const App = () => {
         const loadedLevels: Level[] = [];
         
         for (let i = 0; i < levelFiles.length; i++) {
-          const response = await fetch(`/levels/${levelFiles[i]}`);
+          const response = await fetch(`${process.env.PUBLIC_URL}/levels/${levelFiles[i]}`);
           const text = await response.text();
           const grid = parseLevelFile(text);
           
@@ -81,6 +81,36 @@ const App = () => {
     return [0, 0];
   };
 
+  const handleCellClick = (row: number, col: number) => {
+    const currentGrid = levels[currentLevel]?.grid || [];
+    if (!currentGrid.length) return;
+
+    const targetCell = currentGrid[row][col];
+    
+    // Check if move is valid
+    if (targetCell === 'black') return;
+    if (targetCell === 'red' && playerColor !== 'red') return;
+    if (targetCell === 'blue' && playerColor !== 'blue') return;
+
+    // Handle switch cell
+    if (targetCell === 'switch') {
+      setPlayerColor(prev => prev === 'red' ? 'blue' : 'red');
+    }
+
+    // Check if reached end
+    if (targetCell === 'end') {
+      alert('Level completed!');
+      if (currentLevel < levels.length - 1) {
+        setCurrentLevel(prev => prev + 1);
+        const startPos = findStartPosition(levels[currentLevel + 1].grid);
+        setPlayerPosition(startPos);
+      }
+      return;
+    }
+
+    setPlayerPosition([row, col]);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const [row, col] = playerPosition;
     const currentGrid = levels[currentLevel]?.grid || [];
@@ -107,32 +137,7 @@ const App = () => {
         return;
     }
 
-    const targetCell = currentGrid[newRow][newCol];
-    
-    // Check if move is valid
-    if (targetCell === 'black') return;
-    if (targetCell === 'red' && playerColor !== 'red') return;
-    if (targetCell === 'blue' && playerColor !== 'blue') return;
-    // Path, start, switch and end cells are always passable
-
-    // Handle switch cell
-    if (targetCell === 'switch') {
-      setPlayerColor(prev => prev === 'red' ? 'blue' : 'red');
-    }
-
-    // Check if reached end
-    if (targetCell === 'end') {
-      alert('Level completed!');
-      // Load next level if available
-      if (currentLevel < levels.length - 1) {
-        setCurrentLevel(prev => prev + 1);
-        const startPos = findStartPosition(levels[currentLevel + 1].grid);
-        setPlayerPosition(startPos);
-      }
-      return;
-    }
-
-    setPlayerPosition([newRow, newCol]);
+    handleCellClick(newRow, newCol);
   };
 
   const getCellColor = (cellType: CellType) => {
@@ -219,8 +224,10 @@ const App = () => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             position: 'relative',
-                            boxShadow: cell === 'black' ? '0 0 0 1px #616161' : 'none'
+                            boxShadow: cell === 'black' ? '0 0 0 1px #616161' : 'none',
+                            cursor: 'pointer'
                           }}
+                          onClick={() => handleCellClick(rowIndex, colIndex)}
                         >
                           {playerPosition[0] === rowIndex && playerPosition[1] === colIndex && (
                             <motion.div
